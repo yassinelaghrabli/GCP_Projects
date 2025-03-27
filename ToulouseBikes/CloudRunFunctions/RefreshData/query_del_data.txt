@@ -1,0 +1,6 @@
+DELETE FROM `velo-toulouse-1010.staging.live_data` AS t
+WHERE date < (
+    SELECT MAX(sub.date)
+    FROM `velo-toulouse-1010.staging.live_data` AS sub
+    WHERE JSON_VALUE(sub.data, '$.number') = JSON_VALUE(t.data, '$.number')
+);

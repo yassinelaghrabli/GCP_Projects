@@ -1,0 +1,39 @@
+MERGE INTO `velo-toulouse-1010.toulouse_bikes.live_data` AS target
+USING (
+  SELECT
+    JSON_VALUE(data, '$.number') AS number,
+    JSON_VALUE(data, '$.contract_name') AS contract_name,
+    JSON_VALUE(data, '$.name') AS name,
+    JSON_VALUE(data, '$.address') AS address,
+    CAST(JSON_VALUE(data, '$.position.lat') AS FLOAT64) AS latitude,
+    CAST(JSON_VALUE(data, '$.position.lng') AS FLOAT64) AS longitude,
+    CAST(JSON_VALUE(data, '$.banking') AS BOOL) AS banking,
+    CAST(JSON_VALUE(data, '$.bonus') AS BOOL) AS bonus,
+    CAST(JSON_VALUE(data, '$.bike_stands') AS INT64) AS bike_stands,
+    CAST(JSON_VALUE(data, '$.available_bike_stands') AS INT64) AS available_bike_stands,
+    CAST(JSON_VALUE(data, '$.available_bikes') AS INT64) AS available_bikes,
+    JSON_VALUE(data, '$.status') AS status,
+    CAST(JSON_VALUE(data, '$.last_update') AS INT64) AS last_update,
+    date
+  FROM `velo-toulouse-1010.staging.live_data`
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY JSON_VALUE(data, '$.number') 
+    ORDER BY date DESC
+  ) = 1
+) AS source
+ON target.number = source.number
+WHEN MATCHED THEN
+  UPDATE SET
+    target.contract_name = source.contract_name,
+    target.name = source.name,
+    target.address = source.address,
+    target.latitude = source.latitude,
+    target.longitude = source.longitude,
+    target.banking = source.banking,
+    target.bonus = source.bonus,
+    target.bike_stands = source.bike_stands,
+    target.available_bike_stands = source.available_bike_stands,
+    target.available_bikes = source.available_bikes,
+    target.status = source.status,
+    target.last_update = source.last_update,
+    target.date = source.date;
