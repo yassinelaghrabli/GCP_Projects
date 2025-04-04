@@ -1,4 +1,4 @@
-MERGE INTO `velo-toulouse-1010.toulouse_bikes.live_data` AS target
+MERGE INTO `toulouse_bikes.live_data` AS target
 USING (
   SELECT
     JSON_VALUE(data, '$.number') AS number,
@@ -15,7 +15,7 @@ USING (
     JSON_VALUE(data, '$.status') AS status,
     CAST(JSON_VALUE(data, '$.last_update') AS INT64) AS last_update,
     date
-  FROM `velo-toulouse-1010.staging.live_data`
+  FROM `staging.live_data`
   QUALIFY ROW_NUMBER() OVER (
     PARTITION BY JSON_VALUE(data, '$.number') 
     ORDER BY date DESC

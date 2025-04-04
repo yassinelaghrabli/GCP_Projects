@@ -1,4 +1,4 @@
-DELETE FROM `velo-toulouse-1010.staging.live_data` AS t
+DELETE FROM `staging.live_data` AS t
 WHERE date < (
     SELECT MAX(sub.date)
     FROM `velo-toulouse-1010.staging.live_data` AS sub
